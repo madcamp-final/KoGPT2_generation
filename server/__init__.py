@@ -1,0 +1,1 @@
+from ..idea_generation.generator import KoGPT2IdeaGenerator

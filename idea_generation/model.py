@@ -11,7 +11,8 @@ from torch.utils.data import DataLoader, Dataset
 from transformers.optimization import AdamW, get_cosine_schedule_with_warmup
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 
-from dataset import IdeaDataset
+# from dataset import IdeaDataset
+from idea_generation.dataset import IdeaDataset
 
 U_TKN = '<usr>'
 S_TKN = '<sys>'
@@ -98,7 +99,7 @@ class KoGPT2IdeaModel(LightningModule):
         return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
     def train_dataloader(self):
-        data = pd.read_csv('/root/week4/KoGPT_generation/KoGPT2_generation/skt_dataset.csv')
+        data = pd.read_csv('./skt_dataset.csv')
         self.train_set = IdeaDataset(data, max_len=self.hparams.max_len)
         train_dataloader = DataLoader(
             self.train_set, batch_size=self.hparams.batch_size, num_workers=3,

@@ -1,4 +1,5 @@
-from model import KoGPT2IdeaModel
+# from model import KoGPT2IdeaModel
+from idea_generation.model import KoGPT2IdeaModel
 
 class KoGPT2IdeaGenerator():
     def __init__(self, args) -> None:
