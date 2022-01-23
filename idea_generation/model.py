@@ -10,6 +10,7 @@ from pytorch_lightning.core.lightning import LightningModule
 from torch.utils.data import DataLoader, Dataset
 from transformers.optimization import AdamW, get_cosine_schedule_with_warmup
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
+import tensorflow as tf
 
 # from dataset import IdeaDataset
 from idea_generation.dataset import IdeaDataset
@@ -43,12 +44,12 @@ class KoGPT2IdeaModel(LightningModule):
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--max-len',
                             type=int,
-                            default=32,
+                            default=64,
                             help='max sentence length on input (default: 32)')
 
         parser.add_argument('--batch-size',
                             type=int,
-                            default=96,
+                            default=32,
                             help='batch size for training (default: 96)')
         parser.add_argument('--lr',
                             type=float,
@@ -120,10 +121,6 @@ class KoGPT2IdeaModel(LightningModule):
             while 1:
                 input_ids = torch.LongTensor(tok.encode(U_TKN + category + SENT + sent + S_TKN + a)).unsqueeze(dim=0).cuda()
                 pred = self(input_ids).cuda()
-                # value, index = torch.argmax(
-                #     pred,
-                #     dim=-1).squeeze().numpy().tolist())[-1].cuda()
-
                 gen = tok.convert_ids_to_tokens(
                     torch.argmax(
                         pred,
@@ -131,8 +128,31 @@ class KoGPT2IdeaModel(LightningModule):
                 if gen == EOS:
                     break
                 a += gen.replace('▁', ' ')
-            # print("Simsimi > {}".format(a.strip()))
-            # print(a)
 
             return a
-                            
+
+    def nbest_ideas_maker(self, category):
+        # input_ids = self.tokenizer.encode(category, return_tensors='tf')
+        input_ids = torch.LongTensor(self.tokenizer.encode(BOS + category + EOS)).unsqueeze(dim=0).cuda()
+        beam_outputs = self.model.generate(
+            input_ids, 
+            max_length=50, 
+            num_beams=10, 
+            no_repeat_ngram_size=2, 
+            num_return_sequences=5,
+            early_stopping=True
+        )
+
+        # now we have 3 output sequences
+        print("Output:\n" + 100 * '-')
+        for i, beam_output in enumerate(beam_outputs):
+            print("{}: {}".format(i, self.tokenizer.decode(beam_output, skip_special_tokens=True)))        
+        # result = self.tokenizer.decode(beam_output[0], skip_special_tokens=True)
+
+        result = []
+        for i in range(0, 5):
+            a = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=True)[i]
+            idea = a.replace(category+' ', '')
+            result.append(idea)
+        return result
+

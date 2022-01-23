@@ -21,3 +21,9 @@ if __name__ == "__main__":
     result_2 = evaluator.generate("디자인")
     print(result)
     print(result_2)
+
+    r_list = evaluator.generate_nbest_ideas("내구성")
+    r_list_2 = evaluator.generate_nbest_ideas("내구성")
+
+    print(r_list)
+    print(r_list_2)

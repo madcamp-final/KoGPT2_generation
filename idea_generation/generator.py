@@ -30,4 +30,8 @@ class KoGPT2IdeaGenerator(LightningModule):
     def generate(self, category_content):
         result = self.model.idea_maker(category_content)
         return result
-        
+
+    def generate_nbest_ideas(self, category_content):
+        result = self.model.nbest_ideas_maker(category_content)
+        return result
+
