@@ -27,7 +27,11 @@ class KoGPT2IdeaModel(LightningModule):
         super(KoGPT2IdeaModel, self).__init__()
         self.hparams = hparams
         self.neg = -1e18
+
         self.model = GPT2LMHeadModel.from_pretrained('skt/kogpt2-base-v2')
+        # self.device = torch.device("cuda")
+        # self.model.to(self.device)
+
         self.tokenizer = PreTrainedTokenizerFast.from_pretrained("skt/kogpt2-base-v2",
             bos_token=BOS, eos_token=EOS, unk_token='<unk>',
             pad_token=PAD, mask_token=MASK)
@@ -58,6 +62,7 @@ class KoGPT2IdeaModel(LightningModule):
 
     def forward(self, inputs):
         # (batch, seq_len, hiddens)
+        # inputs = inputs.to(self.device)
         output = self.model(inputs, return_dict=True)
         return output.logits
 
@@ -113,12 +118,16 @@ class KoGPT2IdeaModel(LightningModule):
         with torch.no_grad():
             a = ''
             while 1:
-                input_ids = torch.LongTensor(tok.encode(U_TKN + category + SENT + sent + S_TKN + a)).unsqueeze(dim=0)
-                pred = self(input_ids)
+                input_ids = torch.LongTensor(tok.encode(U_TKN + category + SENT + sent + S_TKN + a)).unsqueeze(dim=0).cuda()
+                pred = self(input_ids).cuda()
+                # value, index = torch.argmax(
+                #     pred,
+                #     dim=-1).squeeze().numpy().tolist())[-1].cuda()
+
                 gen = tok.convert_ids_to_tokens(
                     torch.argmax(
                         pred,
-                        dim=-1).squeeze().numpy().tolist())[-1]
+                        dim=-1).squeeze().cpu().numpy().tolist())[-1]
                 if gen == EOS:
                     break
                 a += gen.replace('▁', ' ')

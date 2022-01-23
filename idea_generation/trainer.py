@@ -26,7 +26,9 @@ class KoGPT2IdeaTrainer():
             prefix='model_'
         )
         # python train_torch.py --train --gpus 1 --max_epochs 3
+        # device = torch.device("cuda")
         model = KoGPT2IdeaModel(self.args)
+        # model.to(device)
         model.train()
         trainer = Trainer.from_argparse_args(
             self.args,
