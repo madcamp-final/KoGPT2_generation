@@ -22,7 +22,7 @@ if __name__ == "__main__":
     print(result)
     print(result_2)
 
-    r_list = evaluator.generate_nbest_ideas("내구성")
+    r_list = evaluator.generate_nbest_ideas("디자인")
     r_list_2 = evaluator.generate_nbest_ideas("내구성")
 
     print(r_list)

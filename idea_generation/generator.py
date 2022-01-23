@@ -1,6 +1,7 @@
 import torch
 import os
 import argparse
+import random
 from pytorch_lightning import Trainer
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -33,5 +34,6 @@ class KoGPT2IdeaGenerator(LightningModule):
 
     def generate_nbest_ideas(self, category_content):
         result = self.model.nbest_ideas_maker(category_content)
-        return result
+        final_result = random.choice(result)
+        return final_result
 

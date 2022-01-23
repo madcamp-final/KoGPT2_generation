@@ -24,9 +24,9 @@ class RequestCategory(BaseModel):
 
 @app.post("/idea_generation/")
 async def idea_generate(item: RequestCategory):
-    result_1 = idea_generator.generate(item.category_content_1)
-    result_2 = idea_generator.generate(item.category_content_2)
-    result_3 = idea_generator.generate(item.category_content_3)
+    result_1 = idea_generator.generate_nbest_ideas(item.category_content_1)
+    result_2 = idea_generator.generate_nbest_ideas(item.category_content_2)
+    result_3 = idea_generator.generate_nbest_ideas(item.category_content_3)
 
     final_result = jsonable_encoder({item.category_content_1: result_1, item.category_content_2: result_2, item.category_content_3: result_3})
     print(final_result)
