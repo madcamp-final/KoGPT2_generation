@@ -143,7 +143,6 @@ class KoGPT2IdeaModel(LightningModule):
             early_stopping=True
         )
 
-        # now we have 3 output sequences
         print("Output:\n" + 100 * '-')
         for i, beam_output in enumerate(beam_outputs):
             print("{}: {}".format(i, self.tokenizer.decode(beam_output, skip_special_tokens=True)))        
