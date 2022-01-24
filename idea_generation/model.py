@@ -1,6 +1,7 @@
 import argparse
 import logging
-
+from unittest.util import _MAX_LENGTH
+import gc
 import numpy as np
 import pandas as pd
 import torch
@@ -12,8 +13,11 @@ from transformers.optimization import AdamW, get_cosine_schedule_with_warmup
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 import tensorflow as tf
 
-# from dataset import IdeaDataset
-from idea_generation.dataset import IdeaDataset
+from dataset import IdeaDataset
+# from idea_generation.dataset import IdeaDataset
+
+gc.collect()
+torch.cuda.empty_cache()
 
 U_TKN = '<usr>'
 S_TKN = '<sys>'
@@ -44,13 +48,13 @@ class KoGPT2IdeaModel(LightningModule):
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--max-len',
                             type=int,
-                            default=64,
-                            help='max sentence length on input (default: 32)')
+                            default=128,
+                            help='max sentence length on input (default: 128)')
 
         parser.add_argument('--batch-size',
                             type=int,
-                            default=32,
-                            help='batch size for training (default: 96)')
+                            default=64,
+                            help='batch size for training (default: 64)')
         parser.add_argument('--lr',
                             type=float,
                             default=5e-5,
@@ -105,7 +109,8 @@ class KoGPT2IdeaModel(LightningModule):
         return torch.LongTensor(data), torch.LongTensor(mask), torch.LongTensor(label)
 
     def train_dataloader(self):
-        data = pd.read_csv('./skt_dataset.csv')
+        # data = pd.read_csv('./skt_dataset.csv')
+        data = pd.read_csv('./shuffled_dataset.csv')
         self.train_set = IdeaDataset(data, max_len=self.hparams.max_len)
         train_dataloader = DataLoader(
             self.train_set, batch_size=self.hparams.batch_size, num_workers=3,
@@ -136,22 +141,36 @@ class KoGPT2IdeaModel(LightningModule):
         input_ids = torch.LongTensor(self.tokenizer.encode(BOS + category + EOS)).unsqueeze(dim=0).cuda()
         beam_outputs = self.model.generate(
             input_ids, 
-            max_length=50, 
+            max_length=128, 
             num_beams=10, 
             no_repeat_ngram_size=2, 
-            num_return_sequences=5,
+            num_return_sequences=10,
             early_stopping=True
         )
 
-        print("Output:\n" + 100 * '-')
+        print("Output:nbest\n" + 100 * '-')
         for i, beam_output in enumerate(beam_outputs):
             print("{}: {}".format(i, self.tokenizer.decode(beam_output, skip_special_tokens=True)))        
         # result = self.tokenizer.decode(beam_output[0], skip_special_tokens=True)
 
         result = []
-        for i in range(0, 5):
+        for i in range(0, 10):
             a = self.tokenizer.batch_decode(beam_outputs.tolist(), skip_special_tokens=True)[i]
             idea = a.replace(category+' ', '')
             result.append(idea)
         return result
 
+    def temperature_idea_maker(self, category):
+        input_ids = torch.LongTensor(self.tokenizer.encode(BOS + category + EOS)).unsqueeze(dim=0).cuda()
+        temp_outputs = self.model.generate(
+            input_ids,
+            do_sample=True,
+            max_length = 128,
+            top_k=0,
+            temperature=0.8
+        )
+        result = self.tokenizer.decode(temp_outputs[0], skip_special_tokens = True)
+        print("Output:temperature\n" + 100 * '-')
+        print(result)
+
+        return result

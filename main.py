@@ -17,8 +17,11 @@ idea_generator = generator.KoGPT2IdeaGenerator(args)
 
 
 class RequestCategory(BaseModel):
+    #상태
     category_content_1: str
+    #디자인
     category_content_2: str
+    #내구성
     category_content_3: str
 
 
