@@ -7,8 +7,8 @@ import torch
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from model import KoGPT2IdeaModel
-# from idea_generation.model import KoGPT2IdeaModel
+# from model import KoGPT2IdeaModel
+from idea_generation.model import KoGPT2IdeaModel
 
 class KoGPT2IdeaTrainer():
     def __init__(self, args) -> None:

@@ -36,29 +36,8 @@ class KoGPT2IdeaGenerator(LightningModule):
 
     def generate_nbest_ideas(self, category_content):
         result = self.model.nbest_ideas_maker(category_content)
-        # f=open('./skt_dataset.csv', encoding='utf8')
-        # reader = csv.reader(f)
-        # csv_list = []
-        # for l in reader:
-        #     csv_list.append(l)
-        # f.close()
-        # data = pd.DataFrame(csv_list)
-        # # data = pd.read_csv('/root/week4/KoGPT2_generation/idea_generation/skt_dataset.csv', encoding='utf-8')
-        # print(data)
-
-        # find_row = []
-        # for k in range(len(data)):
-        #     if(data[0][k]!=category_content):
-        #         find_row.append(k)
-        #     # find_row = data.index[(data['Q'][k]!=category_content)].tolist()
-        # print(find_row)
-        # for i in range(len(result)):
-        #     for j in find_row:
-        #         if(result[i]==data[1][j]):
-        #             del result[i]
-        # print(result)
-        final_result = random.choice(result)
-        return final_result
+        # final_result = random.choice(result)
+        return result
     
     def generate_temp_ideas(self, category_content):
         result = self.model.temperature_idea_maker(category_content)

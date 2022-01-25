@@ -13,8 +13,8 @@ from transformers.optimization import AdamW, get_cosine_schedule_with_warmup
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 import tensorflow as tf
 
-from dataset import IdeaDataset
-# from idea_generation.dataset import IdeaDataset
+# from dataset import IdeaDataset
+from idea_generation.dataset import IdeaDataset
 
 gc.collect()
 torch.cuda.empty_cache()
@@ -134,6 +134,7 @@ class KoGPT2IdeaModel(LightningModule):
                     break
                 a += gen.replace('▁', ' ')
 
+            a.replace(' ', '')
             return a
 
     def nbest_ideas_maker(self, category):
@@ -170,7 +171,8 @@ class KoGPT2IdeaModel(LightningModule):
             temperature=0.8
         )
         result = self.tokenizer.decode(temp_outputs[0], skip_special_tokens = True)
+        final_result = result.replace(category+' ', '')
         print("Output:temperature\n" + 100 * '-')
-        print(result)
+        print(final_result)
 
-        return result
+        return final_result
